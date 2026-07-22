@@ -1,0 +1,15 @@
+outdir: results
+samplesheet: config/samplesheet.csv
+# Supply local paths through config/local.yaml; never mix assemblies/dictionaries.
+reference: null             # GRCh38 FASTA plus .fai and .dict
+targets: null               # assay capture BED, bgzip/tabix not required
+gnomad: null                # GRCh38 AF-only gnomAD VCF.gz plus .tbi
+common_sites: null          # GRCh38 biallelic common SNP VCF.gz plus .tbi
+pon: null                   # assembly-compatible Mutect2 panel of normals VCF.gz
+truth_vcf: null             # SEQC2 HCC1395 somatic truth set v1.2, GRCh38
+truth_bed: null             # SEQC2 High-Confidence_Regions_v1.2.bed
+vep_cache: null             # local VEP cache matching VEP release/GRCh38
+cancer_genes: config/cancer_genes.example.tsv # replace with versioned CGC/OncoKB export if licensed
+vep_species: homo_sapiens
+vep_assembly: GRCh38
+skip_pon: false

@@ -1,0 +1,9 @@
+reference: /absolute/path/GRCh38.d1.vd1.fa
+targets: /absolute/path/exome_capture_targets.GRCh38.bed
+gnomad: /absolute/path/af-only-gnomad.GRCh38.vcf.gz
+common_sites: /absolute/path/small_exac_common_3.GRCh38.vcf.gz
+pon: /absolute/path/1000g_pon.GRCh38.vcf.gz
+truth_vcf: /absolute/path/SEQC2_HCC1395_v1.2.vcf.gz
+truth_bed: /absolute/path/High-Confidence_Regions_v1.2.bed
+vep_cache: /absolute/path/vep-cache
+cancer_genes: /absolute/path/versioned_cancer_gene_symbols.tsv

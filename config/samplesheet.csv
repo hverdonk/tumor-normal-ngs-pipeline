@@ -1,0 +1,4 @@
+sample,role,accession,fastq_1,fastq_2,platform,library
+HCC1395,tumor,SRR7890844,data/fastq/HCC1395_R1.fastq.gz,data/fastq/HCC1395_R2.fastq.gz,ILLUMINA,HCC1395_WES
+HCC1395BL,normal,SRR7890845,data/fastq/HCC1395BL_R1.fastq.gz,data/fastq/HCC1395BL_R2.fastq.gz,ILLUMINA,HCC1395BL_WES
+
