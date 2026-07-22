@@ -3,10 +3,11 @@
 Build the mixed-tool image before running: `docker build -t hcc1395-wes:1.0.0
 containers/`. The workflow also uses these pinned BioContainers/official tags:
 
-The root `environment.yml` contains only the Nextflow runner and Python. Tool
-dependencies are isolated by process because the latest VEP, fastp, mosdepth,
-and HTSlib Bioconda builds currently have mutually exclusive transitive
-HTSlib/libdeflate constraints when placed in one Conda environment.
+The root `environment.yml` contains the Nextflow runner plus the local
+utilities needed for `scripts/fetch_sra.sh` and `scripts/make_test_data.sh`.
+Tool dependencies are still isolated by process because the latest VEP, fastp,
+mosdepth, and HTSlib Bioconda builds currently have mutually exclusive
+transitive HTSlib/libdeflate constraints when placed in one Conda environment.
 
 | Purpose | Image |
 |---|---|

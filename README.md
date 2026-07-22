@@ -22,8 +22,10 @@ example values from being mistaken for observations.
 
 ## Inputs and compatibility
 
-Use the exact tumor/normal roles in `config/samplesheet.csv`. Download reads and
-record their checksums:
+Use the exact tumor/normal roles in `config/samplesheet.csv`. The download
+script retrieves ENA's gzip-compressed paired FASTQs for the listed public SRA
+accessions, verifies ENA's published MD5 checksums, and records SHA-256
+checksums for this run:
 
 ```bash
 scripts/fetch_sra.sh config/samplesheet.csv data/fastq checksums/fastq.sha256
@@ -52,8 +54,8 @@ workflow accepts local, checksum-verified files rather than downloading silently
 
 The offline test creates tiny synthetic paired FASTQs, a toy reference, intervals,
 and truth VCF. It tests preprocessing/alignment wiring, not biological performance.
-Create the pinned Conda environment first (the fixture builder uses bgzip, tabix,
-samtools, and GATK):
+Create the pinned Conda environment first (the fixture builder uses bgzip,
+tabix, samtools, and GATK):
 
 ```bash
 scripts/make_test_data.sh test-data
