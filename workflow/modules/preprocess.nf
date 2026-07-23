@@ -59,10 +59,14 @@ process ALIGN {
   script:
   def ref = ref_bundle.find { it.name ==~ /.*\.(fa|fasta)$/ }
   def rg = "@RG\\tID:${sample}\\tSM:${sample}\\tLB:${library}\\tPL:${platform}\\tPU:${sample}.1"
+  // samtools -@ counts extra workers in addition to its main thread. Reserve
+  // both sort threads from the process allocation while BWA runs concurrently.
+  def sortExtraThreads = task.cpus > 2 ? 1 : 0
+  def bwaThreads = Math.max(1, task.cpus - sortExtraThreads - 1)
   """
   bwa-mem3 index ${ref}
-  bwa-mem3 mem -t ${task.cpus} -R '${rg}' ${ref} ${r1} ${r2} | \
-    samtools sort -@ ${task.cpus} -o ${sample}.sorted.bam -
+  bwa-mem3 mem -t ${bwaThreads} -R '${rg}' ${ref} ${r1} ${r2} | \
+    samtools sort -@ ${sortExtraThreads} -o ${sample}.sorted.bam -
   """
 }
 
