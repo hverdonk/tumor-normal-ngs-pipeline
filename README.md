@@ -29,9 +29,11 @@ record their checksums:
 scripts/fetch_sra.sh config/samplesheet.csv data/fastq checksums/fastq.sha256
 ```
 
-Obtain the reference bundle, capture BED, gnomAD AF-only VCF, common-sites VCF,
-optional panel of normals, VEP cache, and SEQC2 v1.2 truth VCF/BED described in
-`config/parameters.yaml`. These large resources are deliberately not mirrored.
+Obtain the reference bundle, gnomAD AF-only VCF, common-sites VCF, optional panel
+of normals, VEP cache, and SEQC2 v1.2 truth VCF/BED described in
+`config/parameters.yaml`. The SEQC2 confident BED is the fixed interval source
+for coverage, calling, and benchmarking; a separate capture BED cannot be
+configured. These large resources are deliberately not mirrored.
 Every FASTA/VCF/BED must be GRCh38 and use an identical sequence dictionary
 (`chr1` versus `1` is not interchangeable). Put local paths in a private params
 file copied from `config/local.example.yaml`, then generate and verify a manifest:

@@ -4,9 +4,10 @@ process CALL_AND_FILTER {
   container 'hcc1395-wes:1.0.0'
   publishDir "${params.outdir}/variants", mode:'copy'
   input:
-    val pairs
+    tuple val(tumor_name), path(tumor_bam), path(tumor_bai),
+          val(normal_name), path(normal_bam), path(normal_bai)
     path ref_bundle
-    path targets
+    path confident
     path gnomad_bundle
     path common_bundle
     path pon_bundle
@@ -15,22 +16,19 @@ process CALL_AND_FILTER {
     path 'somatic.pass.norm.vcf.gz.tbi'
     path '*.{vcf.gz,vcf.gz.tbi,tar.gz,table}', emit: intermediates
   script:
-  def tumor = pairs.find{ it[1] == 'tumor' }
-  def normal = pairs.find{ it[1] == 'normal' }
   def ref = ref_bundle.find { it.name ==~ /.*\.(fa|fasta)$/ }
   def gnomad = gnomad_bundle.find { it.name.endsWith('.vcf.gz') }
   def common = common_bundle.find { it.name.endsWith('.vcf.gz') }
-  if (!tumor || !normal) error 'Could not resolve matched pair'
   def ponVcf = params.skip_pon ? null : pon_bundle.find { it.name.endsWith('.vcf.gz') }
   def ponArg = params.skip_pon ? '' : "--panel-of-normals ${ponVcf}"
   """
-  gatk Mutect2 -R ${ref} -I ${tumor[2]} -I ${normal[2]} \
-    -tumor ${tumor[0]} -normal ${normal[0]} -L ${targets} \
+  gatk Mutect2 -R ${ref} -I ${tumor_bam} -I ${normal_bam} \
+    -tumor ${tumor_name} -normal ${normal_name} -L ${confident} \
     --germline-resource ${gnomad} ${ponArg} \
     --f1r2-tar-gz f1r2.tar.gz -O somatic.unfiltered.vcf.gz
   gatk LearnReadOrientationModel -I f1r2.tar.gz -O read-orientation-model.tar.gz
-  gatk GetPileupSummaries -I ${tumor[2]} -V ${common} -L ${targets} -O tumor.pileups.table
-  gatk GetPileupSummaries -I ${normal[2]} -V ${common} -L ${targets} -O normal.pileups.table
+  gatk GetPileupSummaries -I ${tumor_bam} -V ${common} -L ${confident} -O tumor.pileups.table
+  gatk GetPileupSummaries -I ${normal_bam} -V ${common} -L ${confident} -O normal.pileups.table
   gatk CalculateContamination -I tumor.pileups.table -matched normal.pileups.table \
     -O contamination.table --tumor-segmentation segments.table
   gatk FilterMutectCalls -R ${ref} -V somatic.unfiltered.vcf.gz \
@@ -44,7 +42,7 @@ process CALL_AND_FILTER {
 }
 
 workflow MUTECT2_FILTER {
-  take: pairs; ref; targets; gnomad; common; pon
-  main: CALL_AND_FILTER(pairs, ref, targets, gnomad, common, pon)
+  take: pair; ref; confident; gnomad; common; pon
+  main: CALL_AND_FILTER(pair, ref, confident, gnomad, common, pon)
   emit: pass_vcf = CALL_AND_FILTER.out.pass
 }

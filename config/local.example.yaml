@@ -1,5 +1,4 @@
 reference: /absolute/path/GRCh38.d1.vd1.fa
-targets: /absolute/path/exome_capture_targets.GRCh38.bed
 gnomad: /absolute/path/af-only-gnomad.GRCh38.vcf.gz
 common_sites: /absolute/path/small_exac_common_3.GRCh38.vcf.gz
 pon: /absolute/path/1000g_pon.GRCh38.vcf.gz

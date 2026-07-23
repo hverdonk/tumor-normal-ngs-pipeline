@@ -93,19 +93,19 @@ process MOSDEPTH {
   publishDir "${params.outdir}/qc/coverage", mode:'copy'
   input:
     tuple val(sample), val(role), path(bam), path(bai)
-    path targets
+    path confident
   output: path "${sample}.mosdepth*", emit: metrics
   script: """
-  mosdepth --threads ${task.cpus} --by ${targets} --thresholds 20,50,100 ${sample}.mosdepth ${bam}
+  mosdepth --threads ${task.cpus} --by ${confident} --thresholds 20,50,100 ${sample}.mosdepth ${bam}
   """
 }
 
 workflow ALIGN_QC {
-  take: reads; ref; targets
+  take: reads; ref; confident
   main:
     ALIGN(reads, ref)
     MARKDUP_QC(ALIGN.out.bam, ref)
-    MOSDEPTH(MARKDUP_QC.out.bam, targets)
+    MOSDEPTH(MARKDUP_QC.out.bam, confident)
   emit:
     bams = MARKDUP_QC.out.bam
     metrics = MARKDUP_QC.out.metrics.mix(MOSDEPTH.out.metrics)

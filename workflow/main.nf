@@ -15,7 +15,9 @@ process MULTIQC_REPORT {
 }
 
 workflow {
-  if (!params.reference || !params.targets || !params.gnomad || !params.common_sites ||
+  if (params.containsKey('targets'))
+    error 'targets is not configurable; truth_bed defines both capture and benchmark regions'
+  if (!params.reference || !params.gnomad || !params.common_sites ||
       !params.truth_vcf || !params.truth_bed || !params.vep_cache)
     error 'Missing required resource path(s); see config/local.example.yaml'
   if (!params.skip_pon && !params.pon) error 'pon is required unless --skip_pon true is explicit'
@@ -34,19 +36,23 @@ workflow {
   refPath = params.reference.toString()
   dictPath = refPath.replaceFirst(/\.(fa|fasta)$/, '.dict')
   ref = Channel.value([file(refPath, checkIfExists:true), file(refPath+'.fai', checkIfExists:true), file(dictPath, checkIfExists:true)])
-  targets = file(params.targets, checkIfExists:true)
+  confident = file(params.truth_bed, checkIfExists:true)
   gnomad = Channel.value([file(params.gnomad, checkIfExists:true), file(params.gnomad+'.tbi', checkIfExists:true)])
   common = Channel.value([file(params.common_sites, checkIfExists:true), file(params.common_sites+'.tbi', checkIfExists:true)])
   truth = Channel.value([file(params.truth_vcf, checkIfExists:true), file(params.truth_vcf+'.tbi', checkIfExists:true)])
-  confident = file(params.truth_bed, checkIfExists:true)
   vep_cache = file(params.vep_cache, checkIfExists:true)
   cancer_genes = file(params.cancer_genes, checkIfExists:true)
   pon = params.skip_pon ? Channel.value([]) : Channel.value([file(params.pon, checkIfExists:true), file(params.pon+'.tbi', checkIfExists:true)])
 
   QC_TRIM(rows)
-  ALIGN_QC(QC_TRIM.out.cleaned, ref, targets)
+  ALIGN_QC(QC_TRIM.out.cleaned, ref, confident)
   MULTIQC_REPORT(QC_TRIM.out.qc.mix(ALIGN_QC.out.metrics).collect())
-  paired = ALIGN_QC.out.bams.collect()
-  MUTECT2_FILTER(paired, ref, targets, gnomad, common, pon)
+  paired = ALIGN_QC.out.bams.collect().map { bams ->
+    def tumor = bams.find { it[1] == 'tumor' }
+    def normal = bams.find { it[1] == 'normal' }
+    if (!tumor || !normal) error 'Could not resolve matched pair'
+    tuple(tumor[0], tumor[2], tumor[3], normal[0], normal[2], normal[3])
+  }
+  MUTECT2_FILTER(paired, ref, confident, gnomad, common, pon)
   ANNOTATE_BENCHMARK(MUTECT2_FILTER.out.pass_vcf, ref, truth, confident, vep_cache, cancer_genes)
 }

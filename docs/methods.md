@@ -4,8 +4,10 @@
 
 HCC1395 (`SRR7890844`) is the tumor and HCC1395BL (`SRR7890845`) its matched
 normal. Both are paired-end WES. The workflow requires local checksummed copies
-of reads and resources. Reference FASTA, target BED, population VCFs, PoN, VEP
-cache, truth VCF, and truth BED must share the same GRCh38 sequence dictionary.
+of reads and resources. Reference FASTA, population VCFs, PoN, VEP cache, truth
+VCF, and truth BED must share the same GRCh38 sequence dictionary. The SEQC2
+high-confidence BED is deliberately the only interval source: it defines both
+the analyzed capture territory and the benchmark territory.
 
 ## Read QC and cleanup
 
@@ -23,7 +25,8 @@ BWA-MEM3 0.6.0 receives explicit ID, sample, library, platform, and platform-uni
 read-group fields. Alignments are coordinate sorted, duplicate-marked (not
 removed), and indexed. Samtools flagstat/stats report total, mapped, and properly
 paired reads. Picard reports duplicate fraction and insert sizes. Mosdepth over
-the capture BED reports mean target coverage and bases at >=20x, >=50x, >=100x.
+the SEQC2 high-confidence BED reports mean target coverage and bases at >=20x,
+>=50x, >=100x.
 Tumor and normal rows must be compared directly because normal undercoverage can
 impair germline/artifact rejection.
 
@@ -34,9 +37,11 @@ AF-only resource, and normally a panel of normals. `--skip_pon true` is explicit
 and recorded when a compatible PoN is unavailable. The matched normal supplies
 site-specific evidence for rare germline variation and sample-specific artifacts.
 
-Tumor and normal pileups at common biallelic sites feed contamination estimation.
-F1R2 counts feed the read-orientation prior. FilterMutectCalls consumes both,
-after which only PASS variants are retained, split, left-aligned, and normalized.
+Mutect2 and tumor/normal pileups are restricted to the same SEQC2
+high-confidence BED used for benchmarking. Pileups at common biallelic sites
+feed contamination estimation. F1R2 counts feed the read-orientation prior.
+FilterMutectCalls consumes both, after which only PASS variants are retained,
+split, left-aligned, and normalized.
 
 ## Annotation and prioritization
 
