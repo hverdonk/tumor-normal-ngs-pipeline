@@ -3,3 +3,8 @@ channels: [conda-forge, bioconda]
 dependencies:
   - nextflow=26.04.6
   - python=3.14.6
+  - sra-tools
+  - pigz
+  - samtools=1.24
+  - htslib
+  - gatk4=4.6.2.0
